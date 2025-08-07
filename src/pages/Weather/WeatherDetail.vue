@@ -1,0 +1,219 @@
+<template>
+  <div class="content-area">
+    <!-- Header -->
+    <div class="header-section" v-if="weather">
+      <div class="header-section__title">
+        <button @click="goBack">
+          <img src="@/assets/images/general/back.png" alt="Back" />
+        </button>
+        <h4>{{ cityNameDisplay }}</h4>
+        <button @click="addToFav">
+          <img src="@/assets/images/general/bin.png" alt="Bin" />
+        </button>
+      </div>
+      <div class="header-section__item">
+        <div class="date">{{ formatDate(now) }}</div>
+        <div class="weather-icon">
+          <img :src="getIconUrl(weather.weather[0].icon)" alt="weather icon" />
+        </div>
+        <div class="temp">{{ Math.round(weather.main.temp) }}°C</div>
+        <div class="desc">{{ capitalize(weather.weather[0].description) }}</div>
+        <div class="update-time">
+          <span> Last Update {{ lastUpdateTime }} </span>
+          <button>
+            <img src="@/assets/images/general/refresh.png" alt="Refresh" />
+          </button>
+        </div>
+      </div>
+    </div>
+    <div v-else class="loading-state">Loading weather...</div>
+
+    <div class="body-section">
+      <HourlyForecast
+        :items="hourlyForecast"
+        :getIconUrl="getIconUrl"
+        :formatHour="formatHour"
+      />
+
+      <WeeklyForecast
+        :items="weeklyForecast"
+        :getIconUrl="getIconUrl"
+        :capitalize="capitalize"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { fetchWeatherByCoords, fetchForecastByCoords } from "@/api/weatherApi";
+import type { WeatherResponse, ForecastResponse } from "@/types/weather";
+import { getIconUrl, formatDate, formatTime, formatHour } from "@/utils/date";
+import HourlyForecast from "./components/HourlyForecast.vue";
+import WeeklyForecast from "./components/WeeklyForecast.vue";
+import { capitalize, getNum } from "@/utils/general";
+
+const route = useRoute();
+const router = useRouter();
+
+const lat = getNum(route.query.lat);
+const lon = getNum(route.query.lon);
+
+const cityName =
+  typeof route.params.cityName === "string" ? route.params.cityName : "";
+
+// --- State ---
+const weather = ref<WeatherResponse | null>(null);
+const forecast = ref<ForecastResponse | null>(null);
+const now = ref(new Date());
+const hourlyForecast = ref<any[]>([]);
+const weeklyForecast = ref<any[]>([]);
+
+// --- Computed UI ---
+const cityNameDisplay = computed(() =>
+  weather.value
+    ? `${weather.value.name}, ${weather.value.sys.country}`
+    : cityName
+);
+
+const lastUpdateTime = computed(() => formatTime(now.value));
+
+// --- Navigation ---
+function goBack() {
+  router.back();
+}
+function addToFav() {
+  alert("Added to favorites!");
+}
+
+// --- Data Loading ---
+onMounted(async () => {
+  if (
+    typeof lat !== "number" ||
+    typeof lon !== "number" ||
+    isNaN(lat) ||
+    isNaN(lon)
+  ) {
+    alert("City coordinates missing.");
+    goBack();
+    return;
+  }
+
+  weather.value = await fetchWeatherByCoords(lat, lon);
+  forecast.value = await fetchForecastByCoords(lat, lon);
+
+  // Hourly forecast: first 5 (3-hour interval) blocks
+  hourlyForecast.value = forecast.value?.list?.slice(0, 5) || [];
+
+  // Weekly forecast: group by day, pick entry at 12:00 for each day, else fallback
+  const dailyMap: Record<string, any> = {};
+  for (const item of forecast.value?.list || []) {
+    const date = new Date(item.dt_txt);
+    const day = date.toLocaleDateString("en-GB", { weekday: "long" });
+    if (!dailyMap[day] || date.getHours() === 12) {
+      dailyMap[day] = {
+        day,
+        temp: item.main.temp,
+        description: item.weather[0].description,
+        icon: item.weather[0].icon,
+      };
+    }
+  }
+  weeklyForecast.value = Object.values(dailyMap);
+});
+</script>
+
+<style scoped>
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-12);
+}
+
+.header-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-12);
+  padding: var(--size-12);
+  background: linear-gradient(
+    to right,
+    var(--primary-blue),
+    var(--secondary-blue),
+    var(--accent-blue)
+  );
+  color: var(--white);
+}
+
+.header-section__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--size-12) 0;
+}
+
+.header-section__title button {
+  display: flex;
+  align-items: center;
+}
+
+.header-section__title button:first-child {
+  width: 9px;
+  height: var(--size-12);
+}
+.header-section__title button:last-child {
+  width: var(--size-16);
+  height: var(--size-16);
+}
+
+.header-section__title button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.header-section__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--size-12);
+  padding: var(--size-12) 0 var(--size-16) 0;
+}
+
+.header-section__item .temp {
+  font-size: var(--text-lg);
+}
+
+.header-section__item .desc {
+  font-size: var(--text-lg);
+  font-weight: var(--semi-bold);
+  margin-bottom: var(--size-20);
+}
+
+.header-section__item .update-time {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4);
+  font-size: var(--text-sm);
+}
+
+.header-section__item .update-time button {
+  display: flex;
+  align-items: center;
+}
+
+.header-section__item .update-time button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.body-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-12);
+}
+</style>
