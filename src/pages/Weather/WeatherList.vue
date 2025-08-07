@@ -1,6 +1,6 @@
 <template>
   <div class="content-area">
-    <div class="title-section">
+    <div class="header-section">
       <h1>Weather</h1>
       <router-link to="/profile">
         <img src="@/assets/images/general/user.png" alt="User" />
@@ -201,23 +201,24 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--size-12);
-  padding: var(--size-12);
+  padding: var(--size-16);
 }
 
-.title-section {
+.header-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: var(--size-12);
 }
 
-.title-section a {
+.header-section a {
   display: flex;
   align-items: center;
   width: var(--size-16);
   height: var(--size-20);
 }
 
-.title-section img {
+.header-section img {
   width: 100%;
   height: 100%;
   object-fit: contain;

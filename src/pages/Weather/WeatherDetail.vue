@@ -1,14 +1,16 @@
 <template>
   <div class="content-area">
-    <!-- Header -->
     <div class="header-section" v-if="weather">
       <div class="header-section__title">
         <button @click="goBack">
-          <img src="@/assets/images/general/back.png" alt="Back" />
+          <img
+            src="@/assets/images/general/chevron-left-white.png"
+            alt="Back"
+          />
         </button>
         <h4>{{ cityNameDisplay }}</h4>
-        <button @click="addToFav">
-          <img src="@/assets/images/general/bin.png" alt="Bin" />
+        <button @click="addFavourite()">
+          <img src="@/assets/images/general/addfav.png" alt="favourite icon" />
         </button>
       </div>
       <div class="header-section__item">
@@ -16,11 +18,14 @@
         <div class="weather-icon">
           <img :src="getIconUrl(weather.weather[0].icon)" alt="weather icon" />
         </div>
-        <div class="temp">{{ Math.round(weather.main.temp) }}°C</div>
+        <div class="temp">
+          <span>{{ Math.round(weather.main.temp) }}°</span>
+          <span>C</span>
+        </div>
         <div class="desc">{{ capitalize(weather.weather[0].description) }}</div>
         <div class="update-time">
           <span> Last Update {{ lastUpdateTime }} </span>
-          <button>
+          <button @click="handleRefresh()">
             <img src="@/assets/images/general/refresh.png" alt="Refresh" />
           </button>
         </div>
@@ -53,9 +58,11 @@ import { getIconUrl, formatDate, formatTime, formatHour } from "@/utils/date";
 import HourlyForecast from "./components/HourlyForecast.vue";
 import WeeklyForecast from "./components/WeeklyForecast.vue";
 import { capitalize, getNum } from "@/utils/general";
+import { useStore } from "@/stores/useStore";
 
 const route = useRoute();
 const router = useRouter();
+const store = useStore();
 
 const lat = getNum(route.query.lat);
 const lon = getNum(route.query.lon);
@@ -83,12 +90,9 @@ const lastUpdateTime = computed(() => formatTime(now.value));
 function goBack() {
   router.back();
 }
-function addToFav() {
-  alert("Added to favorites!");
-}
 
 // --- Data Loading ---
-onMounted(async () => {
+async function loadWeatherData() {
   if (
     typeof lat !== "number" ||
     typeof lon !== "number" ||
@@ -99,6 +103,8 @@ onMounted(async () => {
     goBack();
     return;
   }
+
+  now.value = new Date();
 
   weather.value = await fetchWeatherByCoords(lat, lon);
   forecast.value = await fetchForecastByCoords(lat, lon);
@@ -121,7 +127,18 @@ onMounted(async () => {
     }
   }
   weeklyForecast.value = Object.values(dailyMap);
-});
+}
+
+onMounted(loadWeatherData);
+
+const handleRefresh = () => {
+  loadWeatherData();
+  store.alert("success", "You have refreshed the data successfully");
+};
+
+const addFavourite = () => {
+  store.alert("success", "You have added this city to your favourite.");
+};
 </script>
 
 <style scoped>
@@ -135,7 +152,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--size-12);
-  padding: var(--size-12);
+  padding: var(--size-16);
   background: linear-gradient(
     to right,
     var(--primary-blue),
@@ -182,7 +199,14 @@ onMounted(async () => {
   padding: var(--size-12) 0 var(--size-16) 0;
 }
 
+.header-section__item .date {
+  font-size: var(--text-sm);
+}
+
 .header-section__item .temp {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
   font-size: var(--text-lg);
 }
 
@@ -214,6 +238,7 @@ onMounted(async () => {
 .body-section {
   display: flex;
   flex-direction: column;
-  gap: var(--size-12);
+  gap: var(--size-24);
+  padding: var(--size-16);
 }
 </style>

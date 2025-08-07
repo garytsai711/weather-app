@@ -26,9 +26,9 @@
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .main-container {
+  /* .main-container {
     padding: var(--size-24);
-  }
+  } */
 }
 
 /* Desktop */
@@ -38,8 +38,8 @@
     margin: 0 auto;
   }
 
-  .main-container {
+  /* .main-container {
     padding: var(--size-24);
-  }
+  } */
 }
 </style>

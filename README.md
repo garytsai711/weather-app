@@ -29,7 +29,7 @@ A responsive weather application built with **Vue 3**, **TypeScript**, and the *
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/weather-app.git
+git clone https://github.com/garytsai711/weather-app.git
 
 # 2. Navigate to the project folder
 cd weather-app
@@ -41,6 +41,7 @@ npm install
 # Create a `.env` file in the root with the following:
 VITE_OPENWEATHERMAP_API_KEY=your_api_key_here
 VITE_OPENWEATHERMAP_BASE_URL=https://api.openweathermap.org/data/2.5
+VITE_OPENWEATHERMAP_GEO_BASE_URL=https://api.openweathermap.org/geo/1.0
 
 # 5. Run the development server
 npm run dev

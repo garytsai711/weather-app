@@ -1,17 +1,32 @@
 <template>
-  <section class="forecast-section">
-    <div class="forecast-title">Weekly Forecast</div>
-    <div class="weekly-forecast-card" v-for="day in items" :key="day.day">
-      <div class="weekly-day">
-        <img :src="getIconUrl(day.icon)" />
-        <div>
-          <div class="weekly-title">{{ day.day }}</div>
-          <div class="weekly-desc">{{ capitalize(day.description) }}</div>
+  <section class="weekly-forecast">
+    <h3 class="weekly-forecast__title">Weekly Forecast</h3>
+    <div class="weekly-forecast__list">
+      <div class="weekly-forecast__card" v-for="day in items" :key="day.day">
+        <div class="day">
+          <span class="icon">
+            <img :src="getIconUrl(day.icon)" />
+          </span>
+          <div class="details">
+            <span>{{ day.day }}</span>
+            <span>{{ capitalize(day.description) }}</span>
+          </div>
+        </div>
+        <div class="value">
+          <div>
+            <span>{{ Math.round(day.temp) }}°</span>
+            <span>C</span>
+          </div>
+          <span>
+            <img
+              src="@/assets/images/general/arrow-right.png"
+              alt="Arrow right"
+            />
+          </span>
         </div>
       </div>
-      <div class="weekly-temp">{{ Math.round(day.temp) }}°C</div>
+      <div v-if="!items.length" class="empty-state">No weekly data.</div>
     </div>
-    <div v-if="!items.length" class="empty-state">No weekly data.</div>
   </section>
 </template>
 
@@ -24,52 +39,93 @@ defineProps<{
 </script>
 
 <style scoped>
-.forecast-section {
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  color: #222;
-  margin-top: 16px;
-  padding: 22px 14px 24px 14px;
+.weekly-forecast {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-12);
 }
-.forecast-title {
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: 10px;
+
+.weekly-forecast__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-12);
 }
-.weekly-forecast-card {
+
+.weekly-forecast__card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #e6f0ff;
-  border-radius: 15px;
-  padding: 13px 14px;
-  margin-bottom: 12px;
+  background: var(--light-blue);
+  padding: var(--size-16);
+  border-radius: var(--border-md);
+  font-size: var(--text-sm);
 }
-.weekly-day {
+
+.weekly-forecast__card .day {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--size-8);
 }
-.weekly-day img {
-  width: 30px;
-  height: 30px;
+
+.weekly-forecast__card .day .icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--sky-blue);
+  border-radius: var(--border-circle);
+  width: var(--size-40);
+  height: var(--size-40);
 }
-.weekly-title {
-  font-weight: 600;
-  font-size: 16px;
+
+.weekly-forecast__card .day .icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
-.weekly-desc {
-  font-size: 14px;
-  color: #4785c8;
+
+.weekly-forecast__card .day .details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-8);
 }
-.weekly-temp {
-  font-size: 20px;
-  font-weight: bold;
-  color: #3068b0;
+
+.weekly-forecast__card .day .details span:nth-child(1) {
+  font-size: var(--text-sm);
+  font-weight: var(--semi-bold);
 }
-.empty-state {
-  padding: 8px;
-  font-size: 15px;
-  color: #888;
+
+.weekly-forecast__card .day .details span:nth-child(2) {
+  font-size: var(--text-sm);
+  color: var(--medium-grey);
+}
+
+.weekly-forecast__card .value {
+  display: flex;
+  align-items: center;
+  gap: var(--size-24);
+  font-weight: var(--semi-bold);
+}
+
+.weekly-forecast__card .value div {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+}
+
+.weekly-forecast__card .value div span {
+  font-weight: var(--semi-bold);
+}
+
+.weekly-forecast__card .value > span {
+  width: 5px;
+  height: 10px;
+}
+
+.weekly-forecast__card .value > span > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 </style>

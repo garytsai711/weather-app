@@ -1,33 +1,33 @@
-// // Weather icon url
-// export function getIconUrl(icon?: string) {
-//   return icon ? `https://openweathermap.org/img/wn/${icon}@2x.png` : "";
-// }
-// --- Weather icon imports ---
-import weatherCloudy from "@/assets/images/weather/weather-cloudy.png";
-import weatherRainy from "@/assets/images/weather/weather-rainy.png";
-import weatherNightStorm from "@/assets/images/weather/weather-night-storm.png";
-import weatherPartlyCloudy from "@/assets/images/weather/weather-partly-cloudy.png";
-
-const weatherIconMap: Record<string, string> = {
-  "01d": weatherCloudy, // Clear sky, but mapped to "cloudy" by your request
-  "01n": weatherCloudy,
-  "02d": weatherPartlyCloudy, // Few clouds
-  "02n": weatherPartlyCloudy,
-  "03d": weatherCloudy, // Scattered clouds
-  "03n": weatherCloudy,
-  "04d": weatherCloudy, // Broken clouds
-  "04n": weatherCloudy,
-  "10d": weatherRainy, // Rain
-  "10n": weatherRainy,
-  // Add more as needed
-};
-
 // Weather icon url
 export function getIconUrl(icon?: string) {
-  return icon
-    ? weatherIconMap[icon] ?? `https://openweathermap.org/img/wn/${icon}@2x.png`
-    : "";
+  return icon ? `https://openweathermap.org/img/wn/${icon}@2x.png` : "";
 }
+// // --- Weather icon imports ---
+// import weatherCloudy from "@/assets/images/weather/weather-cloudy.png";
+// import weatherRainy from "@/assets/images/weather/weather-rainy.png";
+// import weatherNightStorm from "@/assets/images/weather/weather-night-storm.png";
+// import weatherPartlyCloudy from "@/assets/images/weather/weather-partly-cloudy.png";
+
+// const weatherIconMap: Record<string, string> = {
+//   "01d": weatherCloudy, // Clear sky, but mapped to "cloudy" by your request
+//   "01n": weatherCloudy,
+//   "02d": weatherPartlyCloudy, // Few clouds
+//   "02n": weatherPartlyCloudy,
+//   "03d": weatherCloudy, // Scattered clouds
+//   "03n": weatherCloudy,
+//   "04d": weatherCloudy, // Broken clouds
+//   "04n": weatherCloudy,
+//   "10d": weatherRainy, // Rain
+//   "10n": weatherRainy,
+//   // Add more as needed
+// };
+
+// // Weather icon url
+// export function getIconUrl(icon?: string) {
+//   return icon
+//     ? weatherIconMap[icon] ?? `https://openweathermap.org/img/wn/${icon}@2x.png`
+//     : "";
+// }
 
 // Format time (from your code)
 export function formatTime(
@@ -60,13 +60,15 @@ export function formatDate(
   }).format(date);
 }
 
-// Format hour from datetime string (your pattern)
-export function formatHour(dt_txt: string, locale = "en-GB") {
-  return new Date(dt_txt).toLocaleTimeString(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+// Format hour from datetime string
+export function formatHour(dt_txt: string, locale = "en-US") {
+  return new Date(dt_txt)
+    .toLocaleTimeString(locale, {
+      hour: "numeric", // No leading zero
+      minute: "2-digit",
+      hour12: true, // 12-hour format with AM/PM
+    })
+    .replace(/am|pm/i, (match) => match.toUpperCase());
 }
 
 // Day or night checker

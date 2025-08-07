@@ -1,6 +1,9 @@
 <template>
   <div class="form-group">
     <label :for="id" class="floated">{{ label }}</label>
+    <span class="flag">
+      <img src="@/assets/images/flag/us.png" alt="Flag" />
+    </span>
     <Input
       :id="id"
       :type="type"
@@ -18,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import Input from "@/components/atoms/Form/Input.vue";
+import Input from "@/components/atoms/Form/InputNumber.vue";
 
 defineProps<{
   label?: string;
@@ -54,13 +57,27 @@ const onInput = (value: string) => {
   pointer-events: none;
 }
 
+.form-group .flag {
+  width: var(--size-16);
+  height: var(--size-12);
+  position: absolute;
+  bottom: var(--size-16);
+  left: var(--size-12);
+  pointer-events: none;
+}
+
+.form-group .flag img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .form-group input {
   width: 100%;
   border-radius: 8px;
   outline: none;
   font-size: var(--text-sm);
   font-weight: var(--semi-bold);
-  padding: var(--size-12);
   letter-spacing: 0.8px;
   background: none;
   font-size: var(--text-sm);
@@ -69,6 +86,7 @@ const onInput = (value: string) => {
   border-radius: var(--border-sm);
   padding: var(--size-12);
   padding-top: var(--size-24);
+  padding-left: var(--size-32);
   box-shadow: inset 0 0 0 1px #e5e5e5;
   transition: box-shadow 0.3s ease-in-out;
   color: var(--black);

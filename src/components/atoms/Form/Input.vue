@@ -24,12 +24,4 @@ const updateValue = (event: Event) => {
 };
 </script>
 
-<style scoped>
-.input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 100%;
-  font-size: 1rem;
-}
-</style>
+<style scoped></style>

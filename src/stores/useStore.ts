@@ -37,11 +37,17 @@ function alert(type: AlertType, message: string) {
   }, 3000);
 }
 
+function clearAlert() {
+  state.alert.show = false;
+  state.alert.message = "";
+}
+
 // ✅ The name is now useStore (not useAppStore)
 export function useStore() {
   return {
     state: readonly(state),
     setLoading,
     alert,
+    clearAlert,
   };
 }

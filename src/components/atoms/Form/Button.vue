@@ -7,11 +7,11 @@
     @click="emit('click')"
   >
     <slot />
-    <span v-if="store.state.isLoading" class="loader">
+    <div v-if="store.state.isLoading" class="loader">
       <svg viewBox="25 25 50 50">
-        <circle r="20" cy="50" cx="50" />
+        <circle r="20" cy="50" cx="50"></circle>
       </svg>
-    </span>
+    </div>
   </button>
 </template>
 
@@ -53,23 +53,83 @@ const type = props.type ?? "button";
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .loader svg {
-  animation: spin 1s linear infinite;
+  width: 1.5rem;
+  height: 1.5rem;
+  transform-origin: center;
+  animation: rotate4 1.2s linear infinite;
+  display: block;
 }
 
 .loader circle {
-  stroke: white;
-  stroke-width: 3;
   fill: none;
+  stroke: var(
+    --light-grey,
+    var(--light-grey)
+  ); /* fallback if --grey isn't set */
+  stroke-width: 4;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
 }
 
-@keyframes spin {
+/* Loader spinning animation */
+@keyframes rotate4 {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Loader dash animation */
+@keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+  100% {
+    stroke-dashoffset: -125px;
+  }
+}
+
+.btn-api {
+  background: var(--primary-button);
+  color: #fff;
+  font-weight: var(--semi-bold);
+  border-radius: var(--border-sm);
+  transition: background 0.2s;
+  letter-spacing: 2px;
+}
+
+.btn-api:hover {
+  background: var(--primary-button-hover);
+}
+
+.btn-api:focus {
+  background: var(--primary-button-active);
+}
+
+.btn-api:focus:not(:focus-visible) {
+  background: var(--primary-button);
+}
+
+.btn-api:focus:hover {
+  background: var(--primary-button-hover);
+}
+
+.btn-api:focus:active {
+  background: var(--primary-button-active);
 }
 </style>

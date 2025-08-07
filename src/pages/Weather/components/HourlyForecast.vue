@@ -7,9 +7,9 @@
         v-for="item in items"
         :key="item.dt_txt"
       >
-        <img :src="getIconUrl(item.weather[0].icon)" />
-        <div class="hourly-temp">{{ Math.round(item.main.temp) }}°</div>
-        <div class="hourly-time">{{ formatHour(item.dt_txt) }}</div>
+        <span> <img :src="getIconUrl(item.weather[0].icon)" /> </span>
+        <span class="temp">{{ Math.round(item.main.temp) }}°</span>
+        <span class="time">{{ formatHour(item.dt_txt) }}</span>
       </div>
       <div v-if="!items.length" class="empty-state">No hourly data.</div>
     </div>
@@ -25,9 +25,18 @@ defineProps<{
 </script>
 
 <style scoped>
+.hourly-forecast {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-12);
+}
+
 .hourly-forecast__list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: var(--size-12);
+  padding-bottom: var(--size-8);
+  overflow-x: auto;
 }
 
 .hourly-forecast__card {
@@ -37,42 +46,24 @@ defineProps<{
   align-items: center;
   background: var(--light-grey);
   border-radius: var(--border-sm);
+  padding: var(--size-12) var(--size-16);
+  gap: var(--size-4);
 }
-.forecast-title {
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: 10px;
+
+.hourly-forecast__card span:nth-child(1) {
+  width: var(--size-40);
+  height: var(--size-40);
 }
-.hourly-forecast-list {
-  display: flex;
-  gap: 14px;
-  overflow-x: auto;
-  margin-bottom: 18px;
+
+.hourly-forecast__card span:nth-child(2) {
+  font-size: var(--text-sm);
+  font-weight: var(--semi-bold);
+  margin-bottom: var(--size-8);
 }
-.hourly-forecast-card {
-  background: #f5f8fa;
-  border-radius: 16px;
-  min-width: 74px;
-  text-align: center;
-  padding: 10px 0;
-  box-shadow: 0 2px 4px rgba(80, 150, 240, 0.07);
-}
-.hourly-forecast-card img {
-  width: 36px;
-  height: 36px;
-}
-.hourly-temp {
-  font-weight: 600;
-  font-size: 16px;
-}
-.hourly-time {
-  font-size: 13px;
-  opacity: 0.7;
-  margin-top: 2px;
-}
-.empty-state {
-  padding: 8px;
-  font-size: 15px;
-  color: #888;
+
+.hourly-forecast__card span:nth-child(3) {
+  font-size: var(--text-xs);
+  color: var(--medium-grey);
+  white-space: nowrap;
 }
 </style>
