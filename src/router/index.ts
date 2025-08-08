@@ -27,6 +27,7 @@ const routes = [
       },
       {
         path: "profile",
+        // meta: { requiresAuth: true },
         children: [
           {
             path: "",
@@ -35,7 +36,6 @@ const routes = [
           },
         ],
       },
-      // Optional: Redirect root to weather
       {
         path: "",
         redirect: "/weather",
