@@ -3,6 +3,7 @@
     :id="id"
     :type="type"
     :value="modelValue"
+    :maxlength="maxLength"
     @input="updateValue"
     class="input"
   />
@@ -13,6 +14,7 @@ defineProps<{
   id?: string;
   type?: string;
   modelValue: string;
+  maxLength?: number;
 }>();
 
 const emit = defineEmits<{

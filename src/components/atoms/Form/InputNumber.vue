@@ -7,6 +7,7 @@
     @input="updateValue"
     class="input"
     autocomplete="off"
+    :maxlength="maxLength"
     :placeholder="placeholder"
     :disabled="disabled"
   />
@@ -18,6 +19,7 @@ defineProps<{
   modelValue: string;
   placeholder?: string;
   disabled?: boolean;
+  maxLength?: number;
 }>();
 
 const emit = defineEmits<{

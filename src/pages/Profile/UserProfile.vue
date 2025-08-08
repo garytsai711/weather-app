@@ -39,13 +39,20 @@
         label="Full name"
         v-model="profile.fullName"
         :error="errors.fullName"
+        :maxLength="50"
       />
-      <InputGroup label="Email" v-model="profile.email" :error="errors.email" />
+      <InputGroup
+        label="Email"
+        v-model="profile.email"
+        :error="errors.email"
+        :maxLength="50"
+      />
       <InputGroupTelephone
         label="Phone Number"
         v-model="profile.phoneNumber"
         :error="errors.phoneNumber"
         inputType="number"
+        :maxLength="50"
       />
     </fieldset>
 
@@ -66,8 +73,8 @@
 import { useRouter } from "vue-router";
 import { ref, reactive } from "vue";
 import { useStore } from "@/stores/useStore";
-import InputGroup from "@/components/molecules/InputGroup.vue";
-import InputGroupTelephone from "@/components/molecules/InputGroupTelephone.vue";
+import InputGroup from "@/components/molecules/Form/InputGroup.vue";
+import InputGroupTelephone from "@/components/molecules/Form/InputGroupTelephone.vue";
 import Button from "@/components/atoms/Form/Button.vue";
 import profileSchema from "@/pages/Profile/schema/profileSchema";
 import { useValidation } from "@/composables/useValidation";
@@ -99,8 +106,7 @@ async function handleEditOrSave() {
     profile.email = userInfo.email;
     profile.phoneNumber = userInfo.phoneNumber;
   } else {
-    // Save mode
-    // VALIDATE FIRST!
+    // Enter save mode and validate
     const isValid = validate(profile);
     if (!isValid) {
       // Show first error in alert
@@ -110,15 +116,21 @@ async function handleEditOrSave() {
     }
     store.setLoading(true);
     try {
-      // Simulate API request
+      // Mimic call API behaviour
       await new Promise((res) => setTimeout(res, 1200));
       userInfo.fullName = profile.fullName;
       userInfo.email = profile.email;
       userInfo.phoneNumber = profile.phoneNumber;
-      store.alert("success", "Profile updated successfully!");
+      store.alert(
+        "success",
+        "You have updated your profile details successfully."
+      );
       isEditing.value = false;
     } catch (e) {
-      store.alert("error", "Update failed, try again!");
+      store.alert(
+        "error",
+        "Update failed, please try again or contact our support team."
+      );
     } finally {
       store.setLoading(false);
     }

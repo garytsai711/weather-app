@@ -42,7 +42,6 @@ function clearAlert() {
   state.alert.message = "";
 }
 
-// ✅ The name is now useStore (not useAppStore)
 export function useStore() {
   return {
     state: readonly(state),

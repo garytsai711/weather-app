@@ -1,51 +1,66 @@
 <template>
   <div class="content-area">
-    <div class="header-section" v-if="weather">
-      <div class="header-section__title">
-        <button @click="goBack">
-          <img
-            src="@/assets/images/general/chevron-left-white.png"
-            alt="Back"
-          />
-        </button>
-        <h4>{{ cityNameDisplay }}</h4>
-        <button @click="addFavourite()">
-          <img src="@/assets/images/general/addfav.png" alt="favourite icon" />
-        </button>
-      </div>
-      <div class="header-section__item">
-        <div class="date">{{ formatDate(now) }}</div>
-        <div class="weather-icon">
-          <img :src="getIconUrl(weather.weather[0].icon)" alt="weather icon" />
-        </div>
-        <div class="temp">
-          <span>{{ Math.round(weather.main.temp) }}°</span>
-          <span>C</span>
-        </div>
-        <div class="desc">{{ capitalize(weather.weather[0].description) }}</div>
-        <div class="update-time">
-          <span> Last Update {{ lastUpdateTime }} </span>
-          <button @click="handleRefresh()">
-            <img src="@/assets/images/general/refresh.png" alt="Refresh" />
+    <!-- Loader -->
+    <Loading v-if="store.state.isLoading" />
+
+    <!-- Empty state -->
+    <div v-else-if="!weather">No records here.</div>
+
+    <!-- Weather Detail -->
+    <template v-else>
+      <div class="header-section">
+        <div class="header-section__title">
+          <button @click="goBack">
+            <img
+              src="@/assets/images/general/chevron-left-white.png"
+              alt="Back"
+            />
+          </button>
+          <h4>{{ cityNameDisplay }}</h4>
+          <button @click="addFavourite()">
+            <img
+              src="@/assets/images/general/addfav.png"
+              alt="favourite icon"
+            />
           </button>
         </div>
+        <div class="header-section__item">
+          <div class="date">{{ formatDate(now) }}</div>
+          <div class="weather-icon">
+            <img
+              :src="getIconUrl(weather.weather[0].icon)"
+              alt="weather icon"
+            />
+          </div>
+          <div class="temp">
+            <span>{{ Math.round(weather.main.temp) }}°</span>
+            <span>C</span>
+          </div>
+          <div class="desc">
+            {{ capitalize(weather.weather[0].description) }}
+          </div>
+          <div class="update-time">
+            <span> Last Update {{ lastUpdateTime }} </span>
+            <button @click="handleRefresh()">
+              <img src="@/assets/images/general/refresh.png" alt="Refresh" />
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-    <div v-else class="loading-state">Loading weather...</div>
 
-    <div class="body-section">
-      <HourlyForecast
-        :items="hourlyForecast"
-        :getIconUrl="getIconUrl"
-        :formatHour="formatHour"
-      />
-
-      <WeeklyForecast
-        :items="weeklyForecast"
-        :getIconUrl="getIconUrl"
-        :capitalize="capitalize"
-      />
-    </div>
+      <div class="body-section">
+        <HourlyForecast
+          :items="hourlyForecast"
+          :getIconUrl="getIconUrl"
+          :formatHour="formatHour"
+        />
+        <WeeklyForecast
+          :items="weeklyForecast"
+          :getIconUrl="getIconUrl"
+          :capitalize="capitalize"
+        />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -59,6 +74,7 @@ import HourlyForecast from "./components/HourlyForecast.vue";
 import WeeklyForecast from "./components/WeeklyForecast.vue";
 import { capitalize, getNum } from "@/utils/general";
 import { useStore } from "@/stores/useStore";
+import Loading from "@/components/atoms/Feedback/Loading.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -93,40 +109,64 @@ function goBack() {
 
 // --- Data Loading ---
 async function loadWeatherData() {
-  if (
-    typeof lat !== "number" ||
-    typeof lon !== "number" ||
-    isNaN(lat) ||
-    isNaN(lon)
-  ) {
-    alert("City coordinates missing.");
-    goBack();
-    return;
-  }
+  // Always start by showing the loader
+  store.setLoading(true);
+  weather.value = null;
+  forecast.value = null;
+  hourlyForecast.value = [];
+  weeklyForecast.value = [];
+  let error = null;
 
-  now.value = new Date();
-
-  weather.value = await fetchWeatherByCoords(lat, lon);
-  forecast.value = await fetchForecastByCoords(lat, lon);
-
-  // Hourly forecast: first 5 (3-hour interval) blocks
-  hourlyForecast.value = forecast.value?.list?.slice(0, 5) || [];
-
-  // Weekly forecast: group by day, pick entry at 12:00 for each day, else fallback
-  const dailyMap: Record<string, any> = {};
-  for (const item of forecast.value?.list || []) {
-    const date = new Date(item.dt_txt);
-    const day = date.toLocaleDateString("en-GB", { weekday: "long" });
-    if (!dailyMap[day] || date.getHours() === 12) {
-      dailyMap[day] = {
-        day,
-        temp: item.main.temp,
-        description: item.weather[0].description,
-        icon: item.weather[0].icon,
-      };
+  try {
+    // Validate coordinates
+    if (
+      typeof lat !== "number" ||
+      typeof lon !== "number" ||
+      isNaN(lat) ||
+      isNaN(lon)
+    ) {
+      store.alert("error", "City coordinates missing.");
+      goBack();
+      return;
     }
+
+    now.value = new Date();
+
+    // Fetch weather data
+    weather.value = await fetchWeatherByCoords(lat, lon);
+    forecast.value = await fetchForecastByCoords(lat, lon);
+
+    // No weather found, treat as "empty"
+    if (!weather.value) {
+      error = "No records here.";
+      return;
+    }
+
+    // Hourly forecast: first 5 (3-hour interval) blocks
+    hourlyForecast.value = forecast.value?.list?.slice(0, 5) || [];
+
+    // Weekly forecast: group by day, pick entry at 12:00 for each day, else fallback
+    const dailyMap: Record<string, any> = {};
+    for (const item of forecast.value?.list || []) {
+      const date = new Date(item.dt_txt);
+      const day = date.toLocaleDateString("en-GB", { weekday: "long" });
+      if (!dailyMap[day] || date.getHours() === 12) {
+        dailyMap[day] = {
+          day,
+          temp: item.main.temp,
+          description: item.weather[0].description,
+          icon: item.weather[0].icon,
+        };
+      }
+    }
+    weeklyForecast.value = Object.values(dailyMap);
+  } catch (err) {
+    // Optionally, set a reactive error state here
+    store.alert("error", "Failed to load weather data.");
+    error = "Failed to load weather data.";
+  } finally {
+    store.setLoading(false);
   }
-  weeklyForecast.value = Object.values(dailyMap);
 }
 
 onMounted(loadWeatherData);
@@ -201,6 +241,17 @@ const addFavourite = () => {
 
 .header-section__item .date {
   font-size: var(--text-sm);
+}
+
+.header-section__item .weather-icon {
+  width: 72px;
+  height: 72px;
+}
+
+.header-section__item .weather-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .header-section__item .temp {

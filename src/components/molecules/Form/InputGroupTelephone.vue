@@ -1,20 +1,23 @@
 <template>
   <div class="form-group">
-    <label :for="id" class="floated">{{ label }}</label>
-    <span class="flag">
-      <img src="@/assets/images/flag/us.png" alt="Flag" />
-    </span>
-    <Input
-      :id="id"
-      :type="type"
-      :modelValue="modelValue"
-      @update:modelValue="onInput"
-      @focus="isFocused = true"
-      @blur="isFocused = false"
-      :class="[{ 'is-focused': isFocused, 'has-value': modelValue }]"
-      autocomplete="off"
-      :disabled="disabled"
-    />
+    <div class="input-group">
+      <label :for="id" class="floated">{{ label }}</label>
+      <span class="flag">
+        <img src="@/assets/images/flag/us.png" alt="Flag" />
+      </span>
+      <Input
+        :id="id"
+        :type="type"
+        :modelValue="modelValue"
+        @update:modelValue="onInput"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+        :class="[{ 'is-focused': isFocused, 'has-value': modelValue }]"
+        autocomplete="off"
+        :maxLength="maxLength"
+        :disabled="disabled"
+      />
+    </div>
     <span v-if="error" class="error">{{ error }}</span>
   </div>
 </template>
@@ -30,6 +33,7 @@ defineProps<{
   modelValue: string;
   error?: string;
   disabled?: boolean;
+  maxLength?: number;
 }>();
 
 const emit = defineEmits<{
@@ -44,8 +48,11 @@ const onInput = (value: string) => {
 
 <style scoped>
 .form-group {
-  position: relative;
   margin-bottom: var(--size-12);
+}
+
+.input-group {
+  position: relative;
 }
 
 .form-group label {

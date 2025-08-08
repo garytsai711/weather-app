@@ -3,7 +3,6 @@ import { reactive } from "vue";
 export function useValidation(
   schema: Record<string, Array<(value: any) => string | null>>
 ) {
-  // Notice: string | undefined, not string | null
   const errors = reactive<Record<string, string | undefined>>({});
 
   function validate(data: Record<string, any>) {

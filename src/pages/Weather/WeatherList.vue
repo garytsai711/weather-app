@@ -7,28 +7,23 @@
       </router-link>
     </div>
 
+    <!-- Parent.vue (inside <template>) -->
     <div class="search-section">
-      <input
+      <SearchBar
         v-model="search"
-        @input="onSearchInput"
+        :cities="suggestions"
         placeholder="Search for a city or airport"
-        class="search-bar"
+        @search="onSearchInput"
+        @select="selectCity"
       />
-      <ul v-if="suggestions.length" class="suggestions">
-        <li
-          v-for="s in suggestions"
-          :key="`${s.name}-${s.lat}`"
-          @click="selectCity(s)"
-        >
-          {{ s.name }}, {{ s.state ?? "" }} {{ s.country }}
-        </li>
-      </ul>
     </div>
-    <div class="body-section">
-      <div v-if="store.state.isLoading">Loading...</div>
 
+    <div class="body-section">
+      <Loading v-if="store.state.isLoading" />
+      <div v-else-if="weatherList.length === 0">No records here.</div>
       <WeatherCard
         v-for="(weather, index) in weatherList"
+        v-else
         :key="weather.id"
         :weather="weather"
         :isMyLocation="index === 0"
@@ -53,6 +48,8 @@ import tzlookup from "tz-lookup";
 import { capitalize } from "@/utils/general";
 import { formatTime, getDayOrNight } from "@/utils/date";
 import { useGeolocation } from "@/composables/useGeolocation";
+import Loading from "@/components/atoms/Feedback/Loading.vue";
+import SearchBar from "@/components/molecules/Form/SearchBar.vue";
 
 const router = useRouter();
 const store = useStore();
@@ -91,10 +88,9 @@ const getDayOrNightForWeather = (
   const localDate = new Date(now);
   localDate.setHours(hour);
 
-  return getDayOrNight(localDate); // Returns "Day" or "Night"
+  return getDayOrNight(localDate);
 };
 
-// Autocomplete
 const onSearchInput = async () => {
   if (search.value.length < 2) {
     suggestions.value = [];
@@ -107,7 +103,7 @@ const onSearchInput = async () => {
   }
 };
 
-// Add city to weather list
+// Redirect to weather detail page of the city
 const selectCity = async (city: CitySuggestion) => {
   suggestions.value = [];
   search.value = "";
@@ -144,7 +140,7 @@ const goToDetail = async (weather: WeatherResponse, index: number) => {
   });
 };
 
-// --- Geolocation: use composable ---
+// Use geolocation composables ---
 const { coords, error: geoError, getLocation } = useGeolocation();
 
 // Watch for new coords and load weather for My Location
@@ -165,7 +161,7 @@ watch(coords, async (val) => {
   }
 });
 
-// Initial load: get geolocation, then add default cities
+// Onmounted get geolocation, then add default cities
 onMounted(async () => {
   getLocation();
 
@@ -176,18 +172,25 @@ onMounted(async () => {
   ];
 
   store.setLoading(true);
+
   try {
-    for (const { name, country } of cities) {
+    // Call API simultaneously using Promise
+    const weatherPromises = cities.map(async ({ name, country }) => {
       const results = await searchCitySuggestions(`${name},${country}`);
       const city = results[0];
-      if (city) {
-        const weather = await fetchWeatherByCoords(city.lat, city.lon);
-        (weather as any).timezone_str = tzlookup(city.lat, city.lon);
-        if (!weatherList.value.some((w) => w.id === weather.id)) {
-          weatherList.value.push(weather);
-        }
+      if (!city) return null;
+      const weather = await fetchWeatherByCoords(city.lat, city.lon);
+      (weather as any).timezone_str = tzlookup(city.lat, city.lon);
+      return weather;
+    });
+
+    const weatherArr = await Promise.all(weatherPromises);
+
+    weatherArr.forEach((weather) => {
+      if (weather && !weatherList.value.some((w) => w.id === weather.id)) {
+        weatherList.value.push(weather);
       }
-    }
+    });
   } catch {
     store.alert("error", "Failed to load default cities.");
   } finally {
@@ -229,25 +232,5 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--size-12);
-}
-
-.search-bar {
-  padding: 0.5rem;
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.suggestions {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  background: white;
-  border: 1px solid #ccc;
-}
-
-.suggestions li {
-  padding: 0.5rem;
-  cursor: pointer;
 }
 </style>

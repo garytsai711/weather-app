@@ -10,6 +10,7 @@
       @blur="isFocused = false"
       :class="[{ 'is-focused': isFocused, 'has-value': modelValue }]"
       autocomplete="off"
+      :maxLength="maxLength"
       :disabled="disabled"
     />
     <span v-if="error" class="error">{{ error }}</span>
@@ -27,6 +28,7 @@ defineProps<{
   modelValue: string;
   error?: string;
   disabled?: boolean;
+  maxLength?: number;
 }>();
 
 const emit = defineEmits<{

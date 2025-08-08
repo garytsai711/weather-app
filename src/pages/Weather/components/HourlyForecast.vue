@@ -55,6 +55,12 @@ defineProps<{
   height: var(--size-40);
 }
 
+.hourly-forecast__card span:nth-child(1) img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .hourly-forecast__card span:nth-child(2) {
   font-size: var(--text-sm);
   font-weight: var(--semi-bold);
