@@ -163,6 +163,11 @@ watch(coords, async (val) => {
 
 // Onmounted get geolocation, then add default cities
 onMounted(async () => {
+  if (!import.meta.env.VITE_OPENWEATHERMAP_API_KEY) {
+    store.alert("error", "Weather API key is missing. Please configure it.");
+    return;
+  }
+
   getLocation();
 
   const cities = [
@@ -172,9 +177,7 @@ onMounted(async () => {
   ];
 
   store.setLoading(true);
-
   try {
-    // Call API simultaneously using Promise
     const weatherPromises = cities.map(async ({ name, country }) => {
       const results = await searchCitySuggestions(`${name},${country}`);
       const city = results[0];

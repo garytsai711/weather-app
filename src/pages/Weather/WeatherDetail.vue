@@ -115,7 +115,6 @@ async function loadWeatherData() {
   forecast.value = null;
   hourlyForecast.value = [];
   weeklyForecast.value = [];
-  let error = null;
 
   try {
     // Validate coordinates
@@ -138,7 +137,6 @@ async function loadWeatherData() {
 
     // No weather found, treat as "empty"
     if (!weather.value) {
-      error = "No records here.";
       return;
     }
 
@@ -161,9 +159,7 @@ async function loadWeatherData() {
     }
     weeklyForecast.value = Object.values(dailyMap);
   } catch (err) {
-    // Optionally, set a reactive error state here
     store.alert("error", "Failed to load weather data.");
-    error = "Failed to load weather data.";
   } finally {
     store.setLoading(false);
   }
