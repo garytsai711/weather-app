@@ -19,9 +19,8 @@ A responsive weather application built with **Vue 3**, **TypeScript**, and the *
 - [Vue 3](https://vuejs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vitejs.dev/)
-- [Pinia](https://pinia.vuejs.org/) – for global state
-- [Vue Router](https://router.vuejs.org/) – for routing
-- [Axios](https://axios-http.com/) – for API calls
+- [Vue Router](https://router.vuejs.org/)
+- [Axios](https://axios-http.com/)
 
 ---
 
